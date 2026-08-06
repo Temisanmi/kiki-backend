@@ -103,7 +103,7 @@ public class CartService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
 
-        return cartRepository.findByUser(user)
+        return cartRepository.findByUserWithItemsAndProducts(user)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + username));
     }
 
