@@ -5,7 +5,6 @@ import com.example.kiki.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -32,6 +31,19 @@ public class PasswordResetService {
             userRepository.save(user);
             passwordResetSender.send(user, rawToken);
         });
+    }
+
+    public String initiateResetAndReturnToken(String email) {
+        return userRepository.findByEmail(email)
+                .map(user -> {
+                    String rawToken = generateToken();
+                    user.setResetTokenHash(hash(rawToken));
+                    user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(TOKEN_VALID_MINUTES));
+                    userRepository.save(user);
+                    passwordResetSender.send(user, rawToken);
+                    return rawToken;
+                })
+                .orElse(null);
     }
 
     public boolean isTokenValid(String rawToken){

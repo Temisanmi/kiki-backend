@@ -1,9 +1,13 @@
 package com.example.kiki.controller;
 
+import com.example.kiki.dto.auth.ForgotPasswordRequest;
 import com.example.kiki.service.PasswordResetService;
+import com.example.kiki.dto.auth.ResetPasswordRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -13,10 +17,15 @@ public class ForgotPasswordController {
     private final PasswordResetService passwordResetService;
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<Map<String, String>> requestReset(@RequestBody Map<String, String> body) {
-        passwordResetService.initiateReset(body.get("email"));
-        return ResponseEntity.ok(Map.of("message",
-                "If an account exists for that email, a reset link has been sent."));
+    public ResponseEntity<Map<String, String>> requestReset(@Valid @RequestBody ForgotPasswordRequest request) {
+        String token = passwordResetService.initiateResetAndReturnToken(request.getEmail());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Reset instructions sent, check your console!.");
+        if (token != null) {
+            response.put("resetLink", "http://localhost:4200/reset-password.html?token=" + token);
+        }
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/reset-password/validate")
@@ -26,20 +35,15 @@ public class ForgotPasswordController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> body) {
-        String token = body.get("token");
-        String password = body.get("password");
-        String confirmPassword = body.get("confirmPassword");
-
-        if (!password.equals(confirmPassword)) {
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
             return ResponseEntity.badRequest().body(Map.of("error", "Passwords don't match."));
         }
 
-        boolean success = passwordResetService.completeReset(token, password);
+        boolean success = passwordResetService.completeReset(request.getToken(), request.getPassword());
         if (!success) {
             return ResponseEntity.badRequest().body(Map.of("error", "That reset link is invalid or expired."));
         }
-
         return ResponseEntity.ok(Map.of("message", "Password reset successful."));
     }
 }
