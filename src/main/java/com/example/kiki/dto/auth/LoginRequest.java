@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 public class LoginRequest {
     @NotBlank(message = "Username is required!")
-    @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters!")
+    @Size(min = 3, max = 20, message = "Invalid username length")
     private String username;
 
     @NotBlank(message = "Password is required!")
-    @Size(min = 6, message = "Password must be at least 6 characters!")
+    @Size(min = 6, message = "Invalid password length")
     private String password;
 }

@@ -12,6 +12,7 @@ public class CartItemResponseDto {
     private Long cartItemId;
     private Long productId;
     private String productName;
+    private String productDescription;
     private String productImageUrl;
     private BigDecimal unitPrice;
     private Integer quantity;

@@ -1,7 +1,6 @@
 package com.example.kiki.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -11,17 +10,16 @@ import java.time.LocalDateTime;
 @Table(name = "products")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_seq")
     @SequenceGenerator(name = "product_seq", sequenceName = "product_sequence", allocationSize = 1)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(length = 1000)
+    @Column(nullable = false, length = 500)
     private String description;
 
     @Column(nullable = false, precision = 10, scale = 2)
@@ -32,5 +30,6 @@ public class Product {
     @Column(nullable = false)
     private Integer stockQuantity;
 
+    @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }

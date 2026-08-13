@@ -23,16 +23,6 @@ public class PasswordResetService {
     private static final long TOKEN_VALID_MINUTES = 10;
     private final SecureRandom random = new SecureRandom();
 
-    public void initiateReset(String email){
-        userRepository.findByEmail(email).ifPresent(user -> {
-            String rawToken = generateToken();
-            user.setResetTokenHash(hash(rawToken));
-            user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(TOKEN_VALID_MINUTES));
-            userRepository.save(user);
-            passwordResetSender.send(user, rawToken);
-        });
-    }
-
     public String initiateResetAndReturnToken(String email) {
         return userRepository.findByEmail(email)
                 .map(user -> {
@@ -85,5 +75,4 @@ public class PasswordResetService {
             throw new IllegalStateException("SHA-256 not available", e);
         }
     }
-
 }

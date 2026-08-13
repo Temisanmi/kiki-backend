@@ -10,7 +10,6 @@ import com.example.kiki.entity.Product;
 import com.example.kiki.entity.User;
 import com.example.kiki.exception.InsufficientStockException;
 import com.example.kiki.exception.ResourceNotFoundException;
-import com.example.kiki.repository.CartItemRepository;
 import com.example.kiki.repository.CartRepository;
 import com.example.kiki.repository.ProductRepository;
 import com.example.kiki.repository.UserRepository;
@@ -23,9 +22,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CartService {
     private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+
+    private Cart getCartEntityForUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+
+        return cartRepository.findByUserWithItemsAndProducts(user)
+                .or(()-> cartRepository.findByUser(user))
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + username));
+    }
 
     public CartResponseDto getCartForUser(String username) {
         Cart cart = getCartEntityForUsername(username);
@@ -99,14 +106,6 @@ public class CartService {
         return toResponseDto(savedCart);
     }
 
-    private Cart getCartEntityForUsername(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
-
-        return cartRepository.findByUserWithItemsAndProducts(user)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + username));
-    }
-
     private CartResponseDto toResponseDto(Cart cart) {
         List<CartItemResponseDto> itemDtos = cart.getItems().stream()
                 .map(this::toItemResponseDto)
@@ -127,6 +126,7 @@ public class CartService {
                 item.getId(),
                 product.getId(),
                 product.getName(),
+                product.getDescription(),
                 product.getImageUrl(),
                 product.getPrice(),
                 item.getQuantity(),

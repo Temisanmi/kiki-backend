@@ -12,12 +12,6 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
 
-    public UserResponseDto getCurrentUser(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found" + username));
-        return toResponseDto(user);
-    }
-
     private UserResponseDto toResponseDto(User user) {
         return new UserResponseDto(
                 user.getId(),
@@ -27,5 +21,11 @@ public class UserService {
                 user.getEmail(),
                 user.getPhoneNumber()
         );
+    }
+
+    public UserResponseDto getCurrentUser(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+        return toResponseDto(user);
     }
 }

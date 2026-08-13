@@ -49,7 +49,12 @@ public class AuthService {
         cartRepository.save(cart);
 
         String token = jwtUtil.generateToken(savedUser.getUsername());
-        return new AuthResponse(token, savedUser.getUsername(), savedUser.getRole().name());
+
+        return new AuthResponse(
+                token,
+                savedUser.getUsername(),
+                savedUser.getRole().name()
+        );
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -61,6 +66,10 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String token = jwtUtil.generateToken(user.getUsername());
-        return new AuthResponse(token, user.getUsername(), user.getRole().name());
+        return new AuthResponse(
+                token,
+                user.getUsername(),
+                user.getRole().name()
+        );
     }
 }

@@ -15,6 +15,17 @@ import org.springframework.stereotype.Service;
 public class ProductService {
     private final ProductRepository productRepository;
 
+    private ProductResponseDto toResponseDto(Product product) {
+        return new ProductResponseDto(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getImageUrl(),
+                product.getStockQuantity()
+        );
+    }
+
     public Page<ProductResponseDto> getAllProducts(Pageable pageable) {
         return productRepository.findAll(pageable)
                 .map(this::toResponseDto);
@@ -63,16 +74,5 @@ public class ProductService {
             throw new ResourceNotFoundException("Product not found with id: " + id);
         }
         productRepository.deleteById(id);
-    }
-
-    private ProductResponseDto toResponseDto(Product product) {
-        return new ProductResponseDto(
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getPrice(),
-                product.getImageUrl(),
-                product.getStockQuantity()
-        );
     }
 }

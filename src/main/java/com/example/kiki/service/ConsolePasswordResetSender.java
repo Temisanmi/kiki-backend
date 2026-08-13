@@ -1,11 +1,11 @@
-package com.example.kiki.service;
+/*Package com.example.kiki.service;
 
 import com.example.kiki.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@Component
+//@Component
 public class ConsolePasswordResetSender implements PasswordResetSender{
     @Override
     public void send(User user, String rawToken) {
@@ -13,3 +13,4 @@ public class ConsolePasswordResetSender implements PasswordResetSender{
                 user.getUsername(), user.getEmail(), rawToken);
     }
 }
+*/
