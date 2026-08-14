@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -16,4 +15,6 @@ public class ProductResponseDto {
     private BigDecimal price;
     private String imageUrl;
     private Integer stockQuantity;
+    private String organizationName;
+    private Long organizationId;
 }

@@ -40,7 +40,7 @@ public class User {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public enum Role{
-        USER, ADMIN
+        USER, ADMIN, ORGANIZATION
     }
 
     private String resetTokenHash;

@@ -32,4 +32,7 @@ public class Product {
 
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Organization organization;
 }

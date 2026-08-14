@@ -8,6 +8,7 @@ import com.example.kiki.entity.User;
 import com.example.kiki.exception.DuplicateResourceException;
 import com.example.kiki.exception.ResourceNotFoundException;
 import com.example.kiki.repository.CartRepository;
+import com.example.kiki.repository.OrganizationRepository;
 import com.example.kiki.repository.UserRepository;
 import com.example.kiki.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
+    private final OrganizationRepository organizationRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -53,7 +55,8 @@ public class AuthService {
         return new AuthResponse(
                 token,
                 savedUser.getUsername(),
-                savedUser.getRole().name()
+                savedUser.getRole().name(),
+                null
         );
     }
 
@@ -66,10 +69,16 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String token = jwtUtil.generateToken(user.getUsername());
+
+        Long organizationId = organizationRepository.findByUser_Username(user.getUsername())
+                .map(org -> org.getId())
+                .orElse(null);
+
         return new AuthResponse(
                 token,
                 user.getUsername(),
-                user.getRole().name()
+                user.getRole().name(),
+                organizationId
         );
     }
 }
