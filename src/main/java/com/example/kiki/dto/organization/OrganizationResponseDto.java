@@ -12,4 +12,5 @@ public class OrganizationResponseDto {
     private String orgName;
     private String orgDescription;
     private String logoUrl;
+    private boolean verified;
 }

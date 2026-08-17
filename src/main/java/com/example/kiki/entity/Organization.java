@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -18,7 +20,7 @@ public class Organization {
     @Column(nullable = false)
     private String orgName;
 
-    private String orgDescription; //main organization description or organization product description??
+    private String orgDescription;
 
     private String logoUrl;
 
@@ -27,4 +29,7 @@ public class Organization {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
+
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Product> products = new ArrayList<>();
 }

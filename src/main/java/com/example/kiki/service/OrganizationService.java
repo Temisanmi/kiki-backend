@@ -89,12 +89,22 @@ public class OrganizationService {
     }
 
     @Transactional
-    public OrganizationResponseDto verifyOrganization(Long id) {
+    public OrganizationResponseDto setVerified(Long id, boolean verified) {
         Organization organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + id));
 
-        organization.setVerified(true);
+        organization.setVerified(verified);
         return toResponseDto(organizationRepository.save(organization));
+    }
+
+    @Transactional
+    public void deleteOrganizationById(Long id) {
+        Organization organization = organizationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + id));
+
+        User user = organization.getUser();
+        organizationRepository.delete(organization); // cascades to products via Organization.products
+        userRepository.delete(user);
     }
 
     private Organization getCurrentOrganization() {
@@ -108,7 +118,8 @@ public class OrganizationService {
                 organization.getId(),
                 organization.getOrgName(),
                 organization.getOrgDescription(),
-                organization.getLogoUrl()
+                organization.getLogoUrl(),
+                organization.isVerified()
         );
     }
 }

@@ -16,6 +16,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -37,12 +39,12 @@ public class ProductService {
     }
 
     public Page<ProductResponseDto> getAllProducts(Pageable pageable) {
-        return productRepository.findAll(pageable)
+        return productRepository.findAllVisible(pageable)
                 .map(this::toResponseDto);
     }
 
     public Page<ProductResponseDto> searchProducts(String keyword, Pageable pageable) {
-        return productRepository.findByNameContainingIgnoreCase(keyword, pageable)
+        return productRepository.searchVisible(keyword, pageable)
                 .map(this::toResponseDto);
     }
 
@@ -50,6 +52,14 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         return toResponseDto(product);
+    }
+
+    public List<ProductResponseDto> getMyProducts() {
+        Organization organization = getCurrentOrganization();
+        return productRepository.findByOrganization_Id(organization.getId())
+                .stream()
+                .map(this::toResponseDto)
+                .toList();
     }
 
     public ProductResponseDto createProduct(ProductRequestDto request) {
@@ -60,7 +70,6 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setImageUrl(request.getImageUrl());
         product.setStockQuantity(request.getStockQuantity());
-
         if (!isAdmin()) {
             product.setOrganization(getCurrentOrganization());
         }
