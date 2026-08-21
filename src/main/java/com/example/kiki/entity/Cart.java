@@ -9,9 +9,9 @@ import java.util.List;
 
 @Entity
 @Table(name = "carts")
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cart_seq")

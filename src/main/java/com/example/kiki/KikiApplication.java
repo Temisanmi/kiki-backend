@@ -14,4 +14,3 @@ public class KikiApplication {
 // & "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U temi -d kiki_db -h localhost
 
 //SELECT id, created_at, email, username, role, phone_number FROM users;
-

@@ -59,6 +59,16 @@ public class UserService {
         return toResponseDto(userRepository.save(user));
     }
 
+    private void deleteUserAndDependencies(User user) {
+        cartRepository.findByUser(user).ifPresent(cartRepository::delete);
+
+        if (user.getRole() == User.Role.ORGANIZATION) {
+            organizationRepository.findByUser_Username(user.getUsername())
+                    .ifPresent(organizationRepository::delete);
+        }
+        userRepository.delete(user);
+    }
+
     @Transactional
     public void deleteCurrentUser(String username) {
         User user = userRepository.findByUsername(username)
@@ -71,16 +81,5 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         deleteUserAndDependencies(user);
-    }
-
-    private void deleteUserAndDependencies(User user) {
-        cartRepository.findByUser(user).ifPresent(cartRepository::delete);
-
-        if (user.getRole() == User.Role.ORGANIZATION) {
-            organizationRepository.findByUser_Username(user.getUsername())
-                    .ifPresent(organizationRepository::delete); // cascades to products
-        }
-
-        userRepository.delete(user);
     }
 }

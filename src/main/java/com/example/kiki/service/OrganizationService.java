@@ -68,6 +68,22 @@ public class OrganizationService {
         );
     }
 
+    private OrganizationResponseDto toResponseDto(Organization organization) {
+        return new OrganizationResponseDto(
+                organization.getId(),
+                organization.getOrgName(),
+                organization.getOrgDescription(),
+                organization.getLogoUrl(),
+                organization.isVerified()
+        );
+    }
+
+    private Organization getCurrentOrganization() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return organizationRepository.findByUser_Username(username)
+                .orElseThrow(() -> new ForbiddenOperationException("No organization profile found for this account"));
+    }
+
     public OrganizationResponseDto getMyOrganization() {
         return toResponseDto(getCurrentOrganization());
     }
@@ -103,23 +119,8 @@ public class OrganizationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + id));
 
         User user = organization.getUser();
-        organizationRepository.delete(organization); // cascades to products via Organization.products
+
+        organizationRepository.delete(organization);
         userRepository.delete(user);
-    }
-
-    private Organization getCurrentOrganization() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return organizationRepository.findByUser_Username(username)
-                .orElseThrow(() -> new ForbiddenOperationException("No organization profile found for this account"));
-    }
-
-    private OrganizationResponseDto toResponseDto(Organization organization) {
-        return new OrganizationResponseDto(
-                organization.getId(),
-                organization.getOrgName(),
-                organization.getOrgDescription(),
-                organization.getLogoUrl(),
-                organization.isVerified()
-        );
     }
 }

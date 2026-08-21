@@ -106,18 +106,6 @@ public class CartService {
         return toResponseDto(savedCart);
     }
 
-    private CartResponseDto toResponseDto(Cart cart) {
-        List<CartItemResponseDto> itemDtos = cart.getItems().stream()
-                .map(this::toItemResponseDto)
-                .toList();
-
-        BigDecimal totalPrice = itemDtos.stream()
-                .map(CartItemResponseDto::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        return new CartResponseDto(cart.getId(), itemDtos, totalPrice);
-    }
-
     private CartItemResponseDto toItemResponseDto(CartItem item) {
         Product product = item.getProduct();
         BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
@@ -132,5 +120,17 @@ public class CartService {
                 item.getQuantity(),
                 subtotal
         );
+    }
+
+    private CartResponseDto toResponseDto(Cart cart) {
+        List<CartItemResponseDto> itemDtos = cart.getItems().stream()
+                .map(this::toItemResponseDto)
+                .toList();
+
+        BigDecimal totalPrice = itemDtos.stream()
+                .map(CartItemResponseDto::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new CartResponseDto(cart.getId(), itemDtos, totalPrice);
     }
 }

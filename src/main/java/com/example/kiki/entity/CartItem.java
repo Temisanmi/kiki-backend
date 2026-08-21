@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "cart_items")
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cart_item_seq")

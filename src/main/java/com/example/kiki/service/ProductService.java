@@ -15,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -26,6 +25,7 @@ public class ProductService {
 
     private ProductResponseDto toResponseDto(Product product) {
         Organization organization = product.getOrganization();
+
         return new ProductResponseDto(
                 product.getId(),
                 product.getName(),
@@ -33,35 +33,17 @@ public class ProductService {
                 product.getPrice(),
                 product.getImageUrl(),
                 product.getStockQuantity(),
-                organization != null ? organization.getOrgName() : null,
+                organization != null ? organization.getOrgName() : null,  //tenary operator
                 organization != null ? organization.getId() : null
         );
     }
 
-    public Page<ProductResponseDto> getAllProducts(Pageable pageable) {
-        return productRepository.findAllVisible(pageable)
-                .map(this::toResponseDto);
+    private boolean isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(authority -> authority.equals("ROLE_ADMIN"));
     }
-
-    public Page<ProductResponseDto> searchProducts(String keyword, Pageable pageable) {
-        return productRepository.searchVisible(keyword, pageable)
-                .map(this::toResponseDto);
-    }
-
-    public ProductResponseDto getProductById(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-        return toResponseDto(product);
-    }
-
-    public List<ProductResponseDto> getMyProducts() {
-        Organization organization = getCurrentOrganization();
-        return productRepository.findByOrganization_Id(organization.getId())
-                .stream()
-                .map(this::toResponseDto)
-                .toList();
-    }
-
     public ProductResponseDto createProduct(ProductRequestDto request) {
         Product product = new Product();
 
@@ -78,6 +60,54 @@ public class ProductService {
         return toResponseDto(saved);
     }
 
+    public Page<ProductResponseDto> getAllProducts(Pageable pageable) {
+        if (isAdmin()){
+            return productRepository.findAll(pageable)
+                    .map(this::toResponseDto);
+        }
+        return productRepository.findAllVisible(pageable)
+                .map(this::toResponseDto);
+    }
+
+    public Page<ProductResponseDto> searchProducts(String keyword, Pageable pageable) {
+        if (isAdmin()){
+            return productRepository.findByNameContainingIgnoreCase(keyword, pageable)
+                    .map(this::toResponseDto);
+        }
+        return productRepository.searchVisible(keyword, pageable)
+                .map(this::toResponseDto);
+    }
+
+    public ProductResponseDto getProductById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        return toResponseDto(product);
+    }
+
+    private Organization getCurrentOrganization() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return organizationRepository.findByUser_Username(username)
+                .orElseThrow(() -> new ForbiddenOperationException("No organization profile found for this account"));
+    }
+    public List<ProductResponseDto> getMyProducts() {
+        Organization organization = getCurrentOrganization();
+        return productRepository.findByOrganization_Id(organization.getId())
+                .stream()
+                .map(this::toResponseDto)
+                .toList();
+    }
+
+    private void assertCanModify(Product product) {
+        if (isAdmin()) {
+            return;
+        }
+
+        Organization current = getCurrentOrganization();
+
+        if (product.getOrganization() == null || !product.getOrganization().getId().equals(current.getId())) {
+            throw new ForbiddenOperationException("You do not have permission to modify this product");
+        }
+    }
     public ProductResponseDto updateProduct(Long id, ProductRequestDto request) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
@@ -97,32 +127,7 @@ public class ProductService {
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-
         assertCanModify(product);
         productRepository.delete(product);
-    }
-
-    private void assertCanModify(Product product) {
-        if (isAdmin()) {
-            return;
-        }
-
-        Organization current = getCurrentOrganization();
-        if (product.getOrganization() == null || !product.getOrganization().getId().equals(current.getId())) {
-            throw new ForbiddenOperationException("You do not have permission to modify this product");
-        }
-    }
-
-    private boolean isAdmin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(authority -> authority.equals("ROLE_ADMIN"));
-    }
-
-    private Organization getCurrentOrganization() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return organizationRepository.findByUser_Username(username)
-                .orElseThrow(() -> new ForbiddenOperationException("No organization profile found for this account"));
     }
 }
