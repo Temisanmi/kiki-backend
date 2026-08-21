@@ -54,8 +54,7 @@ public class CartService {
         int desiredTotal = alreadyInCart + request.getQuantity();
 
         if (desiredTotal > product.getStockQuantity()) {
-            throw new InsufficientStockException(
-                    "Only " + product.getStockQuantity() + " unit(s) of \"" + product.getName() + "\" left in stock");
+            throw new InsufficientStockException("Only " + product.getStockQuantity() + " unit(s) of \"" + product.getName() + "\" left in stock");
         }
 
         if (existingItem != null) {

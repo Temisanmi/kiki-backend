@@ -23,41 +23,6 @@ public class PasswordResetService {
     private static final long TOKEN_VALID_MINUTES = 10;
     private final SecureRandom random = new SecureRandom();
 
-    public String initiateResetAndReturnToken(String email) {
-        return userRepository.findByEmail(email)
-                .map(user -> {
-                    String rawToken = generateToken();
-                    user.setResetTokenHash(hash(rawToken));
-                    user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(TOKEN_VALID_MINUTES));
-                    userRepository.save(user);
-                    passwordResetSender.send(user, rawToken);
-                    return rawToken;
-                })
-                .orElse(null);
-    }
-
-    public boolean isTokenValid(String rawToken){
-        return findUserByToken(rawToken).isPresent();
-    }
-
-    public boolean completeReset(String rawToken, String newPassword){
-        Optional<User> match = findUserByToken(rawToken);
-        if (match.isEmpty())return false;
-
-        User user = match.get();
-        user.setPassword(passwordEncoder.encode(newPassword));
-        user.setResetTokenHash(null);
-        user.setResetTokenExpiry(null);
-        userRepository.save(user);
-        return true;
-    }
-
-    private Optional<User> findUserByToken(String rawToken) {
-        return userRepository.findByResetTokenHash(hash(rawToken))
-                .filter(user -> user.getResetTokenExpiry() != null
-                        && LocalDateTime.now().isBefore(user.getResetTokenExpiry()));
-    }
-
     private String generateToken() {
         byte[] bytes = new byte[32];
         random.nextBytes(bytes);
@@ -74,5 +39,39 @@ public class PasswordResetService {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 not available", e);
         }
+    }
+    public String initiateResetAndReturnToken(String email) {
+        return userRepository.findByEmail(email)
+                .map(user -> {
+                    String rawToken = generateToken();
+                    user.setResetTokenHash(hash(rawToken));
+                    user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(TOKEN_VALID_MINUTES));
+                    userRepository.save(user);
+                    passwordResetSender.send(user, rawToken);
+                    return rawToken;
+                })
+                .orElse(null);
+    }
+
+    private Optional<User> findUserByToken(String rawToken) {
+        return userRepository.findByResetTokenHash(hash(rawToken))
+                .filter(user -> user.getResetTokenExpiry() != null
+                        && LocalDateTime.now().isBefore(user.getResetTokenExpiry()));
+    }
+
+    public boolean isTokenValid(String rawToken){
+        return findUserByToken(rawToken).isPresent();
+    }
+
+    public boolean completeReset(String rawToken, String newPassword){
+        Optional<User> match = findUserByToken(rawToken);
+        if (match.isEmpty())return false;
+
+        User user = match.get();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetTokenHash(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
+        return true;
     }
 }

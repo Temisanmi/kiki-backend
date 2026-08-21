@@ -21,7 +21,7 @@ public class Product {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, length = 1000)
     private String description;
 
     @Column(nullable = false, precision = 10, scale = 2)
@@ -32,7 +32,7 @@ public class Product {
     @Column(nullable = false)
     private Integer stockQuantity;
 
-    @Column(updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne(fetch = FetchType.LAZY)

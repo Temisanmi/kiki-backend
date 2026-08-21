@@ -22,8 +22,7 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<UserResponseDto> updateCurrentUser(
-            Authentication authentication,
+    public ResponseEntity<UserResponseDto> updateCurrentUser(Authentication authentication,
             @Valid @RequestBody UpdateUserRequest request) {
         return ResponseEntity.ok(userService.updateCurrentUser(authentication.getName(), request));
     }

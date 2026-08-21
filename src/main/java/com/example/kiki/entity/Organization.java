@@ -24,6 +24,7 @@ public class Organization {
 
     private String logoUrl;
 
+    @Column(nullable = false)
     private boolean verified;
 
     @OneToOne
