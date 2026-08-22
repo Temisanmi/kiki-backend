@@ -72,7 +72,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of( "http://localhost:4200", "https://kiki-project.vercel.app/"));
+        configuration.setAllowedOrigins(List.of(
+                "http://127.0.0.1:5500/",
+                "http://localhost:4200",
+                "https://kiki-project.vercel.app/"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
