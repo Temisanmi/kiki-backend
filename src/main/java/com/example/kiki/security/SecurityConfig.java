@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole("ADMIN", "ORGANIZATION")
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyRole("ADMIN", "ORGANIZATION")
                         .requestMatchers(HttpMethod.POST, "/api/uploads/image").hasAnyRole("ADMIN", "ORGANIZATION")
+                        .requestMatchers(HttpMethod.GET, "/api/organizations/me/analytics/summary").hasRole("ORGANIZATION")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

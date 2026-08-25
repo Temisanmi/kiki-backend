@@ -4,12 +4,10 @@ import com.example.kiki.dto.cart.AddCartItemRequest;
 import com.example.kiki.dto.cart.CartItemResponseDto;
 import com.example.kiki.dto.cart.CartResponseDto;
 import com.example.kiki.dto.cart.UpdateCartItemRequest;
-import com.example.kiki.entity.Cart;
-import com.example.kiki.entity.CartItem;
-import com.example.kiki.entity.Product;
-import com.example.kiki.entity.User;
+import com.example.kiki.entity.*;
 import com.example.kiki.exception.InsufficientStockException;
 import com.example.kiki.exception.ResourceNotFoundException;
+import com.example.kiki.repository.CartActivityRepository;
 import com.example.kiki.repository.CartRepository;
 import com.example.kiki.repository.ProductRepository;
 import com.example.kiki.repository.UserRepository;
@@ -22,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CartService {
     private final CartRepository cartRepository;
+    private final CartActivityRepository cartActivityRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
@@ -68,6 +67,14 @@ public class CartService {
         }
 
         Cart savedCart = cartRepository.save(cart);
+
+        CartActivity activity = new CartActivity();
+        activity.setProduct(product);
+        activity.setOrganization(product.getOrganization());
+        activity.setUser(cart.getUser());
+        activity.setQuantity(request.getQuantity());
+        cartActivityRepository.save(activity);
+
         return toResponseDto(savedCart);
     }
 
