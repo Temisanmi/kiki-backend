@@ -3,9 +3,12 @@ package com.example.kiki.controller;
 import com.example.kiki.dto.cart.AddCartItemRequest;
 import com.example.kiki.dto.cart.CartResponseDto;
 import com.example.kiki.dto.cart.UpdateCartItemRequest;
+import com.example.kiki.dto.order.OrderResponseDto;
 import com.example.kiki.service.CartService;
+import com.example.kiki.service.CheckoutService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
+    private final CheckoutService checkoutService;
 
     @GetMapping
     public ResponseEntity<CartResponseDto> getCart(Authentication authentication) {
@@ -41,5 +45,11 @@ public class CartController {
             Authentication authentication,
             @PathVariable Long itemId) {
         return ResponseEntity.ok(cartService.removeItemFromCart(authentication.getName(), itemId));
+    }
+
+    @PostMapping("/checkout")
+    public ResponseEntity<OrderResponseDto> checkout(Authentication authentication) {
+        OrderResponseDto order = checkoutService.checkout(authentication.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 }

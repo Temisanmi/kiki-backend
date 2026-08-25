@@ -1,10 +1,12 @@
 package com.example.kiki.controller;
 
+import com.example.kiki.dto.analytics.OrganizationSummaryDto;
 import com.example.kiki.dto.auth.AuthResponse;
 import com.example.kiki.dto.auth.RegisterOrganizationRequest;
 import com.example.kiki.dto.organization.OrganizationResponseDto;
 import com.example.kiki.dto.organization.UpdateOrganizationRequest;
 import com.example.kiki.dto.product.ProductResponseDto;
+import com.example.kiki.service.AnalyticsService;
 import com.example.kiki.service.OrganizationService;
 import com.example.kiki.service.ProductService;
 import jakarta.validation.Valid;
@@ -21,6 +23,7 @@ import java.util.List;
 public class OrganizationController {
     private final OrganizationService organizationService;
     private final ProductService productService;
+    private final AnalyticsService analyticsService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterOrganizationRequest request) {
@@ -43,6 +46,12 @@ public class OrganizationController {
     @PreAuthorize("hasRole('ORGANIZATION')")
     public ResponseEntity<List<ProductResponseDto>> getMyProducts() {
         return ResponseEntity.ok(productService.getMyProducts());
+    }
+
+    @GetMapping("/me/summary")
+    @PreAuthorize("hasRole('ORGANIZATION')")
+    public ResponseEntity<OrganizationSummaryDto> getSummary() {
+        return ResponseEntity.ok(analyticsService.getSummary());
     }
 
     @PatchMapping("/{id}/verify") //(?verifed=false)
