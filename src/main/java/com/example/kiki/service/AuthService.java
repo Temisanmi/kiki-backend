@@ -10,10 +10,12 @@ import com.example.kiki.exception.ResourceNotFoundException;
 import com.example.kiki.repository.CartRepository;
 import com.example.kiki.repository.OrganizationRepository;
 import com.example.kiki.repository.UserRepository;
+import com.example.kiki.security.CustomUserPrincipal;
 import com.example.kiki.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -61,12 +63,12 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
 
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
+        User user = principal.getUser();
 
         String token = jwtUtil.generateToken(user.getUsername());
 

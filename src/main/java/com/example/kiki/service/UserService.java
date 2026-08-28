@@ -8,6 +8,7 @@ import com.example.kiki.exception.ResourceNotFoundException;
 import com.example.kiki.repository.CartRepository;
 import com.example.kiki.repository.OrganizationRepository;
 import com.example.kiki.repository.UserRepository;
+import com.example.kiki.security.CurrentUserProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
     private final OrganizationRepository organizationRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     private UserResponseDto toResponseDto(User user) {
         return new UserResponseDto(
@@ -31,15 +33,13 @@ public class UserService {
     }
 
     public UserResponseDto getCurrentUser(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+        User user = currentUserProvider.getCurrentUser();
         return toResponseDto(user);
     }
 
     @Transactional
     public UserResponseDto updateCurrentUser(String currentUsername, UpdateUserRequest request) {
-        User user = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + currentUsername));
+        User user = currentUserProvider.getCurrentUser();
 
         if (!user.getUsername().equals(request.getUsername())
                 && userRepository.existsByUsername(request.getUsername())) {
@@ -71,8 +71,7 @@ public class UserService {
 
     @Transactional
     public void deleteCurrentUser(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+        User user = currentUserProvider.getCurrentUser();
         deleteUserAndDependencies(user);
     }
 

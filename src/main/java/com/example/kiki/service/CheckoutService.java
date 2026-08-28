@@ -3,10 +3,12 @@ package com.example.kiki.service;
 import com.example.kiki.dto.order.OrderResponseDto;
 import com.example.kiki.entity.*;
 import com.example.kiki.exception.EmptyCartException;
+import com.example.kiki.exception.InsufficientStockException;
 import com.example.kiki.exception.ResourceNotFoundException;
 import com.example.kiki.repository.CartRepository;
 import com.example.kiki.repository.OrderRepository;
-import com.example.kiki.repository.UserRepository;
+import com.example.kiki.repository.ProductRepository;
+import com.example.kiki.security.CurrentUserProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,14 +19,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CheckoutService {
+    private final ProductRepository productRepository;
     private final CartRepository cartRepository;
-    private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     @Transactional
     public OrderResponseDto checkout(String username){
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+        User user = currentUserProvider.getCurrentUser();
 
         Cart cart = cartRepository.findByUserWithItemsAndProducts(user)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + username));
@@ -41,6 +43,16 @@ public class CheckoutService {
 
         for(CartItem cartItem : cart.getItems()){
             Product product = cartItem.getProduct();
+            int quantity = cartItem.getQuantity();
+
+            if(quantity > product.getStockQuantity()){
+                throw new InsufficientStockException(
+                        "Only " + product.getStockQuantity() + " unit(s) of \"" + product.getName() + "\" left in stock"
+                );
+            }
+            product.setStockQuantity(product.getStockQuantity() - quantity);
+            productRepository.save(product);
+
             BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
 
             OrderItem orderItem = new OrderItem();
@@ -64,6 +76,11 @@ public class CheckoutService {
         cart.getItems().clear();
         cartRepository.save(cart);
 
-        return new OrderResponseDto(savedOrder.getId(), savedOrder.getTotalAmount(), savedOrder.getCreatedAt());
+        return new OrderResponseDto(
+                user.getUsername(),
+                savedOrder.getId(),
+                savedOrder.getTotalAmount(),
+                savedOrder.getCreatedAt()
+        );
     }
 }

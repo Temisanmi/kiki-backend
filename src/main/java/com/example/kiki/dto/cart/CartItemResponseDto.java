@@ -1,5 +1,6 @@
 package com.example.kiki.dto.cart;
 
+import com.example.kiki.entity.Organization;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +16,7 @@ public class CartItemResponseDto {
     private String productDescription;
     private String productImageUrl;
     private BigDecimal unitPrice;
+    private String organizationName;
     private Integer quantity;
     private BigDecimal subtotal;
 }

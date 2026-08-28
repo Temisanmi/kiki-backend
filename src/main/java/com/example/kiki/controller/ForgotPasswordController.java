@@ -21,10 +21,6 @@ public class ForgotPasswordController {
         String token = passwordResetService.initiateResetAndReturnToken(request.getEmail());
 
         Map<String, String> response = new HashMap<>();
-        /*response.put("message", "Reset instructions sent, check your console!.");
-        if (token != null) {
-            response.put("resetLink", "https://kiki-project.vercel.app/reset-password.html?token=" + token);
-        }*/
         return ResponseEntity.ok(response);
     }
 

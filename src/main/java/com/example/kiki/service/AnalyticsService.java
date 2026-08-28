@@ -30,6 +30,26 @@ public class AnalyticsService {
                 .orElseThrow(() -> new ForbiddenOperationException("No organization profile found for this account"));
     }
 
+    private SalesSummaryDto buildSalesSummary(Long orgId, LocalDateTime from, LocalDateTime to) {
+        BigDecimal revenue = orderItemRepository.sumRevenueForOrganizationBetween(orgId, from, to);
+        Long units = orderItemRepository.sumUnitsForOrganizationBetween(orgId, from, to);
+        Long orders = orderItemRepository.countOrdersForOrganizationBetween(orgId, from, to);
+
+        return new SalesSummaryDto(revenue, units, orders);
+    }
+
+    private TopProductDto getTopProduct(Long orgId) {
+        List<CartActivityRepository.ProductPopularityRow> rows =
+                cartActivityRepository.findTopProductsForOrganization(orgId, PageRequest.of(0, 1));
+
+        if (rows.isEmpty()) {
+            return null;
+        }
+
+        CartActivityRepository.ProductPopularityRow top = rows.get(0);
+        return new TopProductDto(top.getProductId(), top.getProductName(), top.getTotalAdds());
+    }
+
     public OrganizationSummaryDto getSummary() {
         Organization organization = getCurrentOrganization();
         Long orgId = organization.getId();
@@ -45,25 +65,5 @@ public class AnalyticsService {
         SalesSummaryDto salesThisMonth = buildSalesSummary(orgId, startOfMonth, startOfNextMonth);
 
         return new OrganizationSummaryDto(topProduct, salesToday, salesThisMonth);
-    }
-
-    private TopProductDto getTopProduct(Long orgId) {
-        List<CartActivityRepository.ProductPopularityRow> rows =
-                cartActivityRepository.findTopProductsForOrganization(orgId, PageRequest.of(0, 1));
-
-        if (rows.isEmpty()) {
-            return null;
-        }
-
-        CartActivityRepository.ProductPopularityRow top = rows.get(0);
-        return new TopProductDto(top.getProductId(), top.getProductName(), top.getTotalAdds());
-    }
-
-    private SalesSummaryDto buildSalesSummary(Long orgId, LocalDateTime from, LocalDateTime to) {
-        BigDecimal revenue = orderItemRepository.sumRevenueForOrganizationBetween(orgId, from, to);
-        Long units = orderItemRepository.sumUnitsForOrganizationBetween(orgId, from, to);
-        Long orders = orderItemRepository.countOrdersForOrganizationBetween(orgId, from, to);
-
-        return new SalesSummaryDto(revenue, units, orders);
     }
 }

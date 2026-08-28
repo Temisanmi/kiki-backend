@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class OrderResponseDto {
+    private String username;
     private Long orderId;
     private BigDecimal totalAmount;
     private LocalDateTime createdAt;

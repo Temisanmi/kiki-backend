@@ -11,6 +11,7 @@ import com.example.kiki.repository.CartActivityRepository;
 import com.example.kiki.repository.CartRepository;
 import com.example.kiki.repository.ProductRepository;
 import com.example.kiki.repository.UserRepository;
+import com.example.kiki.security.CurrentUserProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
@@ -22,11 +23,10 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartActivityRepository cartActivityRepository;
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     private Cart getCartEntityForUsername(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+        User user = currentUserProvider.getCurrentUser();
 
         return cartRepository.findByUserWithItemsAndProducts(user)
                 .or(()-> cartRepository.findByUser(user))
@@ -116,6 +116,10 @@ public class CartService {
         Product product = item.getProduct();
         BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
 
+        String organizationName = product.getOrganization() != null
+                ? product.getOrganization().getOrgName()
+                : "Kiki";
+
         return new CartItemResponseDto(
                 item.getId(),
                 product.getId(),
@@ -123,6 +127,7 @@ public class CartService {
                 product.getDescription(),
                 product.getImageUrl(),
                 product.getPrice(),
+                organizationName,
                 item.getQuantity(),
                 subtotal
         );

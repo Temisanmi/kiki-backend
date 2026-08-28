@@ -18,7 +18,7 @@ public class Cart {
     @SequenceGenerator(name = "cart_seq", sequenceName = "cart_sequence", allocationSize = 1)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
