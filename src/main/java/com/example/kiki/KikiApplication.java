@@ -10,6 +10,7 @@ public class KikiApplication {
 		SpringApplication.run(KikiApplication.class, args);
 	}
 }
+
 //https://kebab-rule-blandness.ngrok-free.dev/api/
 
 // & "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U temi -d kiki_db -h localhost

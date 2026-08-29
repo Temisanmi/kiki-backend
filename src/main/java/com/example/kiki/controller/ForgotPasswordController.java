@@ -35,11 +35,8 @@ public class ForgotPasswordController {
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             return ResponseEntity.badRequest().body(Map.of("error", "Passwords don't match."));
         }
+        passwordResetService.completeReset(request.getToken(), request.getPassword());
 
-        boolean success = passwordResetService.completeReset(request.getToken(), request.getPassword());
-        if (!success) {
-            return ResponseEntity.badRequest().body(Map.of("error", "That reset link is invalid or expired."));
-        }
         return ResponseEntity.ok(Map.of("message", "Password reset successful."));
     }
 }

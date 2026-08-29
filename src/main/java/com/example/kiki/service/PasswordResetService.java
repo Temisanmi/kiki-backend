@@ -1,7 +1,9 @@
 package com.example.kiki.service;
 
 import com.example.kiki.entity.User;
+import com.example.kiki.exception.ExpiredOrInvalidTokenException;
 import com.example.kiki.repository.UserRepository;
+import com.example.kiki.security.RateLimiterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
@@ -19,6 +22,7 @@ public class PasswordResetService {
     private final UserRepository userRepository;
     private final PasswordResetSender passwordResetSender;
     private final PasswordEncoder passwordEncoder;
+    private final RateLimiterService rateLimiterService;
 
     private static final long TOKEN_VALID_MINUTES = 10;
     private final SecureRandom random = new SecureRandom();
@@ -41,6 +45,10 @@ public class PasswordResetService {
         }
     }
     public String initiateResetAndReturnToken(String email) {
+        String key = "reset:" + email;
+        rateLimiterService.assertNotBlocked(key);
+        rateLimiterService.recordAttempt(key, 3, Duration.ofMinutes(15), Duration.ofMinutes(15));
+
         return userRepository.findByEmail(email)
                 .map(user -> {
                     String rawToken = generateToken();
@@ -63,15 +71,12 @@ public class PasswordResetService {
         return findUserByToken(rawToken).isPresent();
     }
 
-    public boolean completeReset(String rawToken, String newPassword){
-        Optional<User> match = findUserByToken(rawToken);
-        if (match.isEmpty())return false;
-
-        User user = match.get();
+    public void completeReset(String rawToken, String newPassword){
+        User user = findUserByToken(rawToken)
+                .orElseThrow(() -> new ExpiredOrInvalidTokenException("That reset link is invalid or expired"));
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setResetTokenHash(null);
         user.setResetTokenExpiry(null);
         userRepository.save(user);
-        return true;
     }
 }

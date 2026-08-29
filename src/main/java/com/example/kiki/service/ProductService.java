@@ -10,7 +10,9 @@ import com.example.kiki.repository.OrganizationRepository;
 import com.example.kiki.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -60,7 +62,17 @@ public class ProductService {
         return toResponseDto(saved);
     }
 
+    private Pageable withDefaultSort(Pageable pageable){
+        if(pageable.getSort().isUnsorted()){
+            return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                    Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
+        return pageable;
+    }
+
     public Page<ProductResponseDto> getAllProducts(Pageable pageable) {
+        pageable = withDefaultSort(pageable);
+
         if (isAdmin()){
             return productRepository.findAll(pageable)
                     .map(this::toResponseDto);
@@ -70,6 +82,8 @@ public class ProductService {
     }
 
     public Page<ProductResponseDto> searchProducts(String keyword, Pageable pageable) {
+        pageable = withDefaultSort(pageable);
+
         if (isAdmin()){
             return productRepository.findByNameContainingIgnoreCase(keyword, pageable)
                     .map(this::toResponseDto);

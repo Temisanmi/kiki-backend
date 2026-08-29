@@ -10,7 +10,6 @@ import com.example.kiki.exception.ResourceNotFoundException;
 import com.example.kiki.repository.CartActivityRepository;
 import com.example.kiki.repository.CartRepository;
 import com.example.kiki.repository.ProductRepository;
-import com.example.kiki.repository.UserRepository;
 import com.example.kiki.security.CurrentUserProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +30,39 @@ public class CartService {
         return cartRepository.findByUserWithItemsAndProducts(user)
                 .or(()-> cartRepository.findByUser(user))
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user: " + username));
+    }
+
+    private CartItemResponseDto toItemResponseDto(CartItem item) {
+        Product product = item.getProduct();
+        BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+
+        String organizationName = product.getOrganization() != null
+                ? product.getOrganization().getOrgName()
+                : "Kiki";
+
+        return new CartItemResponseDto(
+                item.getId(),
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getImageUrl(),
+                product.getPrice(),
+                organizationName,
+                item.getQuantity(),
+                subtotal
+        );
+    }
+
+    private CartResponseDto toResponseDto(Cart cart) {
+        List<CartItemResponseDto> itemDtos = cart.getItems().stream()
+                .map(this::toItemResponseDto)
+                .toList();
+
+        BigDecimal totalPrice = itemDtos.stream()
+                .map(CartItemResponseDto::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new CartResponseDto(cart.getId(), itemDtos, totalPrice);
     }
 
     public CartResponseDto getCartForUser(String username) {
@@ -110,38 +142,5 @@ public class CartService {
 
         Cart savedCart = cartRepository.save(cart);
         return toResponseDto(savedCart);
-    }
-
-    private CartItemResponseDto toItemResponseDto(CartItem item) {
-        Product product = item.getProduct();
-        BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-
-        String organizationName = product.getOrganization() != null
-                ? product.getOrganization().getOrgName()
-                : "Kiki";
-
-        return new CartItemResponseDto(
-                item.getId(),
-                product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getImageUrl(),
-                product.getPrice(),
-                organizationName,
-                item.getQuantity(),
-                subtotal
-        );
-    }
-
-    private CartResponseDto toResponseDto(Cart cart) {
-        List<CartItemResponseDto> itemDtos = cart.getItems().stream()
-                .map(this::toItemResponseDto)
-                .toList();
-
-        BigDecimal totalPrice = itemDtos.stream()
-                .map(CartItemResponseDto::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        return new CartResponseDto(cart.getId(), itemDtos, totalPrice);
     }
 }

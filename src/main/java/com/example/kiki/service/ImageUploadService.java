@@ -2,6 +2,7 @@ package com.example.kiki.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.example.kiki.exception.UpstreamServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,7 +31,7 @@ public class ImageUploadService {
             );
             return (String) result.get("secure_url");
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to upload image", e);
+            throw new UpstreamServiceException("Failed to upload image to Cloudinary", e);
         }
     }
 }

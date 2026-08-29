@@ -1,6 +1,7 @@
 package com.example.kiki.service;
 
 import com.example.kiki.entity.User;
+import com.example.kiki.exception.UpstreamServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -41,7 +42,7 @@ public class MailTrapPasswordResetSender implements PasswordResetSender {
             helper.setText(htmlBody, true);
             mailSender.send(message);
         } catch (MessagingException e) {
-            throw new IllegalStateException("Failed to send password reset email", e);
+            throw new UpstreamServiceException("Failed to send password reset email", e);
         }
     }
 }
