@@ -10,6 +10,8 @@ import com.example.kiki.repository.OrganizationRepository;
 import com.example.kiki.repository.UserRepository;
 import com.example.kiki.security.CurrentUserProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +30,13 @@ public class UserService {
                 user.getLastName(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getPhoneNumber()
+                user.getPhoneNumber(),
+                user.getRole().name()
         );
+    }
+
+    public Page<UserResponseDto> getAllUsers(Pageable pageable){
+        return userRepository.findAll(pageable).map(this::toResponseDto);
     }
 
     public UserResponseDto getCurrentUser(String username) {

@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
@@ -35,15 +35,15 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    public enum Role{
+        USER, ADMIN, ORGANIZATION
+    }
+
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    public enum Role{
-        USER, ADMIN, ORGANIZATION
-    }
 
     private String resetTokenHash;
 

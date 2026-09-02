@@ -32,7 +32,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
 
@@ -44,7 +44,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -60,8 +60,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyRole("ADMIN", "ORGANIZATION")
                         .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole("ADMIN", "ORGANIZATION")
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyRole("ADMIN", "ORGANIZATION")
-                        .requestMatchers(HttpMethod.POST, "/api/uploads/image").hasAnyRole("ADMIN", "ORGANIZATION")
-                        .requestMatchers(HttpMethod.GET, "/api/organizations/me/analytics/summary").hasRole("ORGANIZATION")
+                        .requestMatchers(HttpMethod.GET, "/api/organizations/me/summary").hasRole("ORGANIZATION")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

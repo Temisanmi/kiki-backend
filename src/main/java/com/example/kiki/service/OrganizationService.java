@@ -13,6 +13,8 @@ import com.example.kiki.repository.OrganizationRepository;
 import com.example.kiki.repository.UserRepository;
 import com.example.kiki.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -82,6 +84,10 @@ public class OrganizationService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return organizationRepository.findByUser_Username(username)
                 .orElseThrow(() -> new ForbiddenOperationException("No organization profile found for this account"));
+    }
+
+    public Page<OrganizationResponseDto> getAllOrganizations(Pageable pageable) {
+        return organizationRepository.findAll(pageable).map(this::toResponseDto);
     }
 
     public OrganizationResponseDto getMyOrganization() {
