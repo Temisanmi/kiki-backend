@@ -42,7 +42,9 @@ public class CheckoutService {
         BigDecimal total = BigDecimal.ZERO;
 
         for(CartItem cartItem : cart.getItems()){
-            Product product = cartItem.getProduct();
+            Product product = productRepository.findByIdForUpdate(cartItem.getProduct().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product no longer exists"));
+
             int quantity = cartItem.getQuantity();
 
             if(quantity > product.getStockQuantity()){

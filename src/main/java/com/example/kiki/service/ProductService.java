@@ -72,13 +72,11 @@ public class ProductService {
 
     public Page<ProductResponseDto> getAllProducts(Pageable pageable) {
         pageable = withDefaultSort(pageable);
-
         if (isAdmin()){
-            return productRepository.findAll(pageable)
-                    .map(this::toResponseDto);
+            return productRepository.findAll(pageable).map(this::toResponseDto);
         }
-        return productRepository.findAllVisible(pageable)
-                .map(this::toResponseDto);
+
+        return productRepository.findAllVisible(pageable).map(this::toResponseDto);
     }
 
     public Page<ProductResponseDto> searchProducts(String keyword, Pageable pageable) {
