@@ -67,7 +67,7 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         String limiterKey = "login:" + request.getUsername();
-        rateLimiterService.assertNotBlocked(limiterKey);
+        rateLimiterService.assertAllowed(limiterKey, 5, Duration.ofMinutes(5));
 
         Authentication authentication;
         try {
@@ -75,11 +75,8 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
         } catch (BadCredentialsException ex) {
-            rateLimiterService.recordAttempt(limiterKey, 5, Duration.ofMinutes(10), Duration.ofMinutes(10));
             throw ex;
         }
-
-        rateLimiterService.reset(limiterKey);
 
         CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
         User user = principal.getUser();

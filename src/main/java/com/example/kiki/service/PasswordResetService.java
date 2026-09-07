@@ -46,8 +46,7 @@ public class PasswordResetService {
     }
     public String initiateResetAndReturnToken(String email) {
         String key = "reset:" + email;
-        rateLimiterService.assertNotBlocked(key);
-        rateLimiterService.recordAttempt(key, 3, Duration.ofMinutes(15), Duration.ofMinutes(15));
+        rateLimiterService.assertAllowed(key, 3, Duration.ofMinutes(15));
 
         return userRepository.findByEmail(email)
                 .map(user -> {
