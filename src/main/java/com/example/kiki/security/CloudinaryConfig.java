@@ -1,4 +1,4 @@
-package com.example.kiki.config;
+package com.example.kiki.security;
 
 import com.cloudinary.Cloudinary;
 import org.springframework.beans.factory.annotation.Value;
