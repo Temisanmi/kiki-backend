@@ -1,12 +1,16 @@
 package com.example.kiki.controller;
 
+import com.example.kiki.dto.order.OrderDetailDto;
 import com.example.kiki.dto.user.UpdateUserRequest;
 import com.example.kiki.dto.user.UserResponseDto;
+import com.example.kiki.service.CheckoutService;
 import com.example.kiki.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -17,12 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<UserResponseDto>> getAllUsers(Pageable pageable){
-        return ResponseEntity.ok(userService.getAllUsers(pageable));
-    }
+    private final CheckoutService checkoutService;
 
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getCurrentUser(Authentication authentication) {
@@ -46,5 +45,11 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me/orders")
+    public ResponseEntity<Page<OrderDetailDto>> getMyOrders(
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(checkoutService.getMyOrders(pageable));
     }
 }

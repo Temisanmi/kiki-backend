@@ -11,4 +11,5 @@ public class OrganizationSummaryDto {
     private TopProductDto topProduct;
     private SalesSummaryDto salesToday;
     private SalesSummaryDto salesThisMonth;
+    private long totalCheckouts;
 }
