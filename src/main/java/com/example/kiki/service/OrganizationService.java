@@ -5,8 +5,10 @@ import com.example.kiki.dto.analytics.SalesSummaryDto;
 import com.example.kiki.dto.analytics.TopProductDto;
 import com.example.kiki.dto.auth.AuthResponse;
 import com.example.kiki.dto.auth.RegisterOrganizationRequest;
+import com.example.kiki.dto.order.OrgOrderItemDto;
 import com.example.kiki.dto.organization.OrganizationResponseDto;
 import com.example.kiki.dto.organization.UpdateOrganizationRequest;
+import com.example.kiki.entity.OrderItem;
 import com.example.kiki.entity.Organization;
 import com.example.kiki.entity.User;
 import com.example.kiki.exception.DuplicateResourceException;
@@ -176,7 +178,27 @@ public class OrganizationService {
 
         SalesSummaryDto salesToday = buildSalesSummary(orgId, startOfToday, startOfTomorrow);
         SalesSummaryDto salesThisMonth = buildSalesSummary(orgId, startOfMonth, startOfNextMonth);
+        long totalCheckouts = orderItemRepository.countAllOrdersForOrganization(orgId);
 
-        return new OrganizationSummaryDto(topProduct, salesToday, salesThisMonth);
+        return new OrganizationSummaryDto(topProduct, salesToday, salesThisMonth, totalCheckouts);
+    }
+
+    public Page<OrgOrderItemDto> getMyOrderItems(Pageable pageable) {
+        Organization organization = getCurrentOrganization();
+        return orderItemRepository.findByOrganization_Id(organization.getId(), pageable)
+                .map(this::toOrgOrderItemDto);
+    }
+
+    private OrgOrderItemDto toOrgOrderItemDto(OrderItem item) {
+        return new OrgOrderItemDto(
+                item.getOrder().getId(),
+                item.getOrder().getCreatedAt(),
+                item.getOrder().getUser() != null ? item.getOrder().getUser().getUsername() : null,
+                item.getProduct() != null ? item.getProduct().getId() : null,
+                item.getProductName(),
+                item.getUnitPrice(),
+                item.getQuantity(),
+                item.getSubTotal()
+        );
     }
 }

@@ -35,7 +35,10 @@ public class UserService {
         );
     }
 
-    public Page<UserResponseDto> getAllUsers(Pageable pageable){
+    public Page<UserResponseDto> getAllUsers(User.Role role, Pageable pageable){
+        if(role != null){
+            return userRepository.findByRole(role, pageable).map(this::toResponseDto);
+        }
         return userRepository.findAll(pageable).map(this::toResponseDto);
     }
 
