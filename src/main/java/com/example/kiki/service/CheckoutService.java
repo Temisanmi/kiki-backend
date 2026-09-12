@@ -1,5 +1,7 @@
 package com.example.kiki.service;
 
+import com.example.kiki.dto.order.OrderDetailDto;
+import com.example.kiki.dto.order.OrderItemDetailDto;
 import com.example.kiki.dto.order.OrderResponseDto;
 import com.example.kiki.entity.*;
 import com.example.kiki.exception.EmptyCartException;
@@ -10,6 +12,8 @@ import com.example.kiki.repository.OrderRepository;
 import com.example.kiki.repository.ProductRepository;
 import com.example.kiki.security.CurrentUserProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -83,6 +87,36 @@ public class CheckoutService {
                 savedOrder.getId(),
                 savedOrder.getTotalAmount(),
                 savedOrder.getCreatedAt()
+        );
+    }
+
+    public Page<OrderDetailDto> getMyOrders(Pageable pageable) {
+        User user = currentUserProvider.getCurrentUser();
+        return orderRepository.findByUser_Id(user.getId(), pageable).map(this::toOrderDetailDto);
+    }
+
+    public Page<OrderDetailDto> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable).map(this::toOrderDetailDto);
+    }
+
+    private OrderDetailDto toOrderDetailDto(Order order) {
+        List<OrderItemDetailDto> items = order.getItems().stream()
+                .map(oi -> new OrderItemDetailDto(
+                        oi.getProduct() != null ? oi.getProduct().getId() : null,
+                        oi.getProductName(),
+                        oi.getOrganization() != null ? oi.getOrganization().getOrgName() : "Platform",
+                        oi.getUnitPrice(),
+                        oi.getQuantity(),
+                        oi.getSubTotal()
+                ))
+                .toList();
+
+        return new OrderDetailDto(
+                order.getId(),
+                order.getUser() != null ? order.getUser().getUsername() : null,
+                order.getTotalAmount(),
+                order.getCreatedAt(),
+                items
         );
     }
 }
