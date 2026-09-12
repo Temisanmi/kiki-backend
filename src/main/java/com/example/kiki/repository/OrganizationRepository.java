@@ -9,4 +9,6 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
     Optional<Organization> findByUser_Username(String username);
 
     boolean existsByOrgName(String orgName);
+
+    long countByVerified(boolean verified);
 }
