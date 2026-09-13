@@ -72,7 +72,7 @@ public class PasswordResetService {
 
     public void completeReset(String rawToken, String newPassword){
         User user = findUserByToken(rawToken)
-                .orElseThrow(() -> new ExpiredOrInvalidTokenException("That reset link is invalid or expired"));
+                .orElseThrow(() -> new ExpiredOrInvalidTokenException("Invalid or expired link!"));
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setResetTokenHash(null);
         user.setResetTokenExpiry(null);
