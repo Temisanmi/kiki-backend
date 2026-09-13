@@ -27,7 +27,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -183,12 +182,6 @@ public class OrganizationService {
         return new OrganizationSummaryDto(topProduct, salesToday, salesThisMonth, totalCheckouts);
     }
 
-    public Page<OrgOrderItemDto> getMyOrderItems(Pageable pageable) {
-        Organization organization = getCurrentOrganization();
-        return orderItemRepository.findByOrganization_Id(organization.getId(), pageable)
-                .map(this::toOrgOrderItemDto);
-    }
-
     private OrgOrderItemDto toOrgOrderItemDto(OrderItem item) {
         return new OrgOrderItemDto(
                 item.getOrder().getId(),
@@ -200,5 +193,11 @@ public class OrganizationService {
                 item.getQuantity(),
                 item.getSubTotal()
         );
+    }
+
+    public Page<OrgOrderItemDto> getMyOrderItems(Pageable pageable) {
+        Organization organization = getCurrentOrganization();
+        return orderItemRepository.findByOrganization_Id(organization.getId(), pageable)
+                .map(this::toOrgOrderItemDto);
     }
 }
