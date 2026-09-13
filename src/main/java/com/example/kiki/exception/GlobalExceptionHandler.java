@@ -45,8 +45,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ForbiddenOperationException.class)
     public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenOperationException ex) {
         ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(), HttpStatus.FORBIDDEN.value(),
-                HttpStatus.FORBIDDEN.getReasonPhrase(), ex.getMessage());
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                ex.getMessage()
+        );
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
 
@@ -56,7 +59,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.UNAUTHORIZED.value(),
                 HttpStatus.UNAUTHORIZED.getReasonPhrase(),
-                "Invalid Credentials"
+                "Invalid credentials"
         );
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
@@ -106,26 +109,33 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleMalformedBody(HttpMessageNotReadableException ex) {
         ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                "Malformed or missing request body");
+                "Malformed or missing request body"
+        );
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(), ex.getMessage());
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage()
+        );
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
         ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(), HttpStatus.CONFLICT.value(),
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
                 HttpStatus.CONFLICT.getReasonPhrase(),
-                "This action conflicts with existing data");
+                "This action conflicts with existing data"
+        );
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
