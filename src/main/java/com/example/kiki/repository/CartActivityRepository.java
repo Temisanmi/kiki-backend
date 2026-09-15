@@ -11,6 +11,12 @@ import java.util.List;
 @Repository
 public interface CartActivityRepository extends JpaRepository<CartActivity, Long> {
 
+    interface ProductPopularityRow {
+        Long getProductId();
+        String getProductName();
+        Long getTotalAdds();
+    }
+
     @Query("SELECT ca.product.id AS productId, ca.product.name AS productName, " +
             "SUM(ca.quantity) AS totalAdds " +
             "FROM CartActivity ca " +
@@ -18,10 +24,4 @@ public interface CartActivityRepository extends JpaRepository<CartActivity, Long
             "GROUP BY ca.product.id, ca.product.name " +
             "ORDER BY SUM(ca.quantity) DESC")
     List<ProductPopularityRow> findTopProductsForOrganization(@Param("organizationId") Long organizationId, Pageable pageable);
-
-    interface ProductPopularityRow {
-        Long getProductId();
-        String getProductName();
-        Long getTotalAdds();
-    }
 }
