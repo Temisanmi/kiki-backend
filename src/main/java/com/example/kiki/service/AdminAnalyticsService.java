@@ -35,23 +35,31 @@ public class AdminAnalyticsService {
         LocalDateTime startOfTomorrow = startOfToday.plusDays(1);
         LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
         LocalDateTime startOfNextMonth = startOfMonth.plusMonths(1);
+        long totalCheckouts = orderItemRepository.count();
 
         SalesSummaryDto salesToday = buildSalesSummary(startOfToday, startOfTomorrow);
         SalesSummaryDto salesThisMonth = buildSalesSummary(startOfMonth, startOfNextMonth);
+        SalesSummaryDto salesAllTime = new SalesSummaryDto(
+                orderRepository.sumTotalRevenue(),
+                orderItemRepository.sumTotalUnits(),
+                totalCheckouts
+        );
 
-        long totalCheckouts = orderRepository.count();
         long totalUsers = userRepository.count();
         long totalOrganizations = organizationRepository.count();
         long verifiedOrganizations = organizationRepository.countByVerified(true);
+        long unverifiedOrganizations = organizationRepository.countByVerified(false);
         long totalProducts = productRepository.count();
 
         return new AdminSummaryDto(
                 totalCheckouts,
                 salesToday,
                 salesThisMonth,
+                salesAllTime,
                 totalUsers,
                 totalOrganizations,
                 verifiedOrganizations,
+                unverifiedOrganizations,
                 totalProducts
         );
     }
