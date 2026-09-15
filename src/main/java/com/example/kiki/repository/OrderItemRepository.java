@@ -44,4 +44,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
     @EntityGraph(attributePaths = {"order", "order.user", "product"})
     Page<OrderItem> findByOrganization_Id(Long organizationId, Pageable pageable);
+
+    @Query("SELECT COALESCE(SUM(oi.quantity), 0) FROM OrderItem oi")
+    Long sumTotalUnits();
 }
