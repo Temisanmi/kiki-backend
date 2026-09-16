@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.UNAUTHORIZED.value(),
                 HttpStatus.UNAUTHORIZED.getReasonPhrase(),
-                "Invalid credentials"
+                "No such account!"
         );
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
