@@ -12,5 +12,4 @@ public class KikiApplication {
 
 //https://kebab-rule-blandness.ngrok-free.dev/api/
 
-// & "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U temi -d kiki_db -h localhost
-
+// psql -U temi -d kiki_db
